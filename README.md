@@ -1,3 +1,3 @@
 # To The Arena
 
-An battle game with a special fighting technique.
+A battle game with a special fighting technique.
