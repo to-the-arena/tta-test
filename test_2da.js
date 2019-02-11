@@ -9,7 +9,7 @@ function startGame() {
 		sx: 0,
 		sy: 0
 	};
-	mySword = new sword(0, 0, 30, -300, 0.3);
+	mySword = new sword(myGameArea.canvas.width / 4, myGameArea.canvas.height / 4, 30, -300, 0.3);
 };
 
 function updateGameArea() {
@@ -82,34 +82,23 @@ function sMove(parent) {
 	ny = nhy - (nhy - mySword.y) * Math.sqrt(Math.pow(hx - mySword.x , 2) + Math.pow(hy - mySword.y , 2)) / Math.sqrt(Math.pow(nhx - mySword.x , 2) + Math.pow(nhy - mySword.y , 2));
 	
 	//Find new angle in new r (nr)
-	
 	if (nhx - nx <= 0) {
 		nr = Math.acos((nhy - ny) / Math.sqrt(Math.pow(nhx - nx , 2) + Math.pow(nhy - ny , 2)));
 	} else {
 		nr = - Math.acos((nhy - ny) / Math.sqrt(Math.pow(nhx - nx , 2) + Math.pow(nhy - ny , 2)));
 	};
 
-	parent.x = nx;
-	parent.y = ny;
-	parent.r = nr;
-
-	/*//check if mySword.click exists
-	if (mySword.click !== undefined) {
-		if (mySword.click.dx !== undefined) {
-			//Handle position
-			var x = Math.sin(mySword.r) * mySword.h * mySword.com[1];
-			var y = Math.cos(mySword.r) * mySword.h * mySword.com[1];
-			//new handle position and relative to com
-			x += mySword.click.dx;
-			y += mySword.click.dy;
-			//change of distance from com
-			var u = - Math.sqrt(x*x+y*y) + Math.abs(mySword.h * mySword.com[1]);
-			//change of angle
-			var r = - mySword.r + Math.atan(x/y);
-			//return update function
-			return mySword.update(u, r);
-		} else {return mySword.update(0, 0)};
-	} else {return mySword.update(0, 0)};*/
+	//update Positon and Rotation
+	if (mouse.button == 0) {	
+		if (nr < - 0.5 * Math.PI || nr > 0.7 * Math.PI) {
+			parent.x = mySword.x + mouse.sx - mouse.fx;
+			parent.y = mySword.y + mouse.sy - mouse.fy;
+		} else {
+			parent.x = nx;
+			parent.y = ny;
+			parent.r = nr;
+		};
+	};
 };
 
 
@@ -117,7 +106,7 @@ function sMove(parent) {
 myGameArea.canvas.addEventListener("mousedown", myClick);
 myGameArea.canvas.addEventListener("mousemove", myMove);
 myGameArea.canvas.addEventListener("mouseout", myClear);
-myGameArea.canvas.addEventListener("mouserelease", myClear);
+myGameArea.canvas.addEventListener("mouseup", myClear);
 
 function myClick(ev) {
 	mouse.button = ev.button;
