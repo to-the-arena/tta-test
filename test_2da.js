@@ -74,9 +74,9 @@ function sMove(parent) {
 	//Find new com Position in new x (nx) and new y (ny)
 	// hx, hy Handle Position nhx, nhy new Handle position
 	hx = (Math.sin(parent.r) * parent.h * parent.com[1]) + parent.x;
-	hy = (Math.cos(parent.r) * parent.h * parent.com[1]) + parent.y;
+	hy = - (Math.cos(parent.r) * parent.h * parent.com[1]) + parent.y;
 	nhx = hx + mouse.sx - mouse.fx;
-	nhy = hy + mouse.sx - mouse.fx;
+	nhy = hy + mouse.sy - mouse.fy;
 
 	nx = nhx - (nhx - mySword.x) * Math.sqrt(Math.pow(hx - mySword.x , 2) + Math.pow(hy - mySword.y , 2)) / Math.sqrt(Math.pow(nhx - mySword.x , 2) + Math.pow(nhy - mySword.y , 2));
 	ny = nhy - (nhy - mySword.y) * Math.sqrt(Math.pow(hx - mySword.x , 2) + Math.pow(hy - mySword.y , 2)) / Math.sqrt(Math.pow(nhx - mySword.x , 2) + Math.pow(nhy - mySword.y , 2));
