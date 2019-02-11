@@ -3,13 +3,24 @@
 function startGame() {
 
 	myGameArea.start();
-	mySword = new sword(myGameArea.canvas.width/2,myGameArea.canvas.height/2,30,-300,0.3);
-}
+	mouse = {
+		fx: 0,
+		fy: 0,
+		sx: 0,
+		sy: 0
+	};
+	mySword = new sword(0, 0, 30, -300, 0.3);
+};
 
 function updateGameArea() {
+	//Drawing updates
 	myGameArea.clear();
-	sMove();
-}
+	mySword.update();
+
+	//Mousemovement per Frame
+	mouse.fx = mouse.sx;
+	mouse.fy = mouse.sy;
+};
 
 
 //Game Area
@@ -26,7 +37,7 @@ var myGameArea = {
 	clear : function() {
 		this.context.clearRect(-this.canvas.width, -this.canvas.height, 2*this.canvas.width, 2*this.canvas.height);
 	}
-}
+};
 
 
 //Constructors
@@ -36,44 +47,53 @@ function sword(x, y, w, h, com_y) {
 	this.r = 0;
 	this.w = w;
 	this.h = h;
+	let parent = this;
 	// com = Center of mass
 	this.com = [0.5,com_y];
-	this.click;
 	ctx = myGameArea.context;
 	ctx.translate(x, y);
 	ctx.fillStyle = "FF0000";
-	this.update = function(u, r) {
-		//Mousemovement per Frame
-		if (this.click !== undefined) {
-			if (this.click.sx !== undefined) {
-				this.click.dx = this.click.sx - this.click.fx
-				this.click.dy = this.click.sy - this.click.fy
-				this.click.fx = this.click.sx;
-				this.click.fy = this.click.sy;
-			}
-		}
+	this.update = function() {
 
 		//Coordiantes of entity
-		if (this.r > 2 * Math.PI) {
-			this.r -= 2* Math.PI;
-		}
-		this.r -= r;
-		this.x += Math.sin(this.r) * u;
-		this.y += Math.cos(this.r) * u;
-
+		sMove(parent);
+		
 
 		//Positioning and Drawing
-		
-		ctx.rotate(r);
-  		ctx.translate(0 , u);
-  		ctx.fillRect(-this.com[0] * this.w , -this.com[1] * this.h , this.w , this.h);
+		ctx.save();
+  		ctx.translate(parent.x, parent.y);
+		ctx.rotate(parent.r);
+  		ctx.fillRect(- parent.com[0] * parent.w , - parent.com[1] * parent.h , parent.w , parent.h);
+  		ctx.restore();
   	}
-}
+};
 
 
 //Sword Move 
-function sMove() {
-	//check if mySword.click exists
+function sMove(parent) {
+	//Find new com Position in new x (nx) and new y (ny)
+	// hx, hy Handle Position nhx, nhy new Handle position
+	hx = (Math.sin(parent.r) * parent.h * parent.com[1]) + parent.x;
+	hy = (Math.cos(parent.r) * parent.h * parent.com[1]) + parent.y;
+	nhx = hx + mouse.sx - mouse.fx;
+	nhy = hy + mouse.sx - mouse.fx;
+
+	nx = nhx - (nhx - mySword.x) * Math.sqrt(Math.pow(hx - mySword.x , 2) + Math.pow(hy - mySword.y , 2)) / Math.sqrt(Math.pow(nhx - mySword.x , 2) + Math.pow(nhy - mySword.y , 2));
+	ny = nhy - (nhy - mySword.y) * Math.sqrt(Math.pow(hx - mySword.x , 2) + Math.pow(hy - mySword.y , 2)) / Math.sqrt(Math.pow(nhx - mySword.x , 2) + Math.pow(nhy - mySword.y , 2));
+	
+	//Find new angle in new r (nr)
+	
+	if (nhx - nx <= 0) {
+		nr = Math.acos((nhy - ny) / Math.sqrt(Math.pow(nhx - nx , 2) + Math.pow(nhy - ny , 2)));
+	} else {
+		nr = - Math.acos((nhy - ny) / Math.sqrt(Math.pow(nhx - nx , 2) + Math.pow(nhy - ny , 2)));
+	};
+
+	parent.x = nx;
+	parent.y = ny;
+	parent.r = nr;
+
+	/*//check if mySword.click exists
 	if (mySword.click !== undefined) {
 		if (mySword.click.dx !== undefined) {
 			//Handle position
@@ -89,8 +109,8 @@ function sMove() {
 			//return update function
 			return mySword.update(u, r);
 		} else {return mySword.update(0, 0)};
-	} else {return mySword.update(0, 0)};
-}
+	} else {return mySword.update(0, 0)};*/
+};
 
 
 //Events
@@ -100,23 +120,15 @@ myGameArea.canvas.addEventListener("mouseout", myClear);
 myGameArea.canvas.addEventListener("mouserelease", myClear);
 
 function myClick(ev) {
-	mySword.click = {
-		button: ev.button,
-		fx: ev.clientX,
-		fy: ev.clientY
-	}
-}
+	mouse.button = ev.button;
+};
 
 function myMove(ev) {
-	if (mySword.click !== undefined) {
-		if (mySword.click.button == 0) {
-			mySword.click.sx = ev.clientX;
-			mySword.click.sy = ev.clientY;
-		}
-	}
-}
+	mouse.sx = ev.clientX;
+	mouse.sy = ev.clientY;
+};
 
 function myClear(ev) {
-	mySword.click = undefined;
-}
+	mouse.button = null;
+};
 
