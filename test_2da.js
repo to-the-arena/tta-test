@@ -9,7 +9,7 @@ function startGame() {
 		sx: 0,
 		sy: 0
 	};
-	mySword = new sword(myGameArea.canvas.width / 4, myGameArea.canvas.height / 4, 30, -300, 0.3);
+	mySword = new sword(myGameArea.canvas.width / 4, myGameArea.canvas.height / 4, 40, -400, 0.3);
 	
 };
 
@@ -48,7 +48,7 @@ function sword(x, y, w, h, com_y) {
 	this.r = 0;
 	this.w = w;
 	this.h = h;
-	this.vMax = 50;
+	this.vMax = 40;
 
 	// com = Center of mass
 	this.com = [0.5,com_y];
@@ -73,8 +73,12 @@ function sword(x, y, w, h, com_y) {
   		ctx.restore();
   	};
 
-  	this.attack = function(type) {
-		attType.fillText(type, -300, -130);
+  	this.attack = function(direction) {
+		if (direction >= 0.8) {
+			attType.fillText("slash", -300, -130);
+		} else if (direction <= - 0.8) {
+			attType.fillText("stab", -300, -130);
+		} else {attType.fillText(null, -300, -130);};
 	};
 };
 
@@ -111,17 +115,16 @@ function sMove(parent) {
 		//Check for attack
 		if ((dx != 0 || dy != 0) && mouse.button == 0) {	
 			// dir is angle between mouse movement and Handle vector
-			var dir = ((dx) * (Math.sin(parent.r) * parent.h * parent.com[1] + dx) + (dy) * ( - Math.cos(parent.r) * parent.h * parent.com[1] + dy)) / (Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2)) * Math.sqrt(Math.pow(Math.sin(parent.r) * parent.h * parent.com[1] + dx, 2) + Math.pow( - Math.cos(parent.r) * parent.h * parent.com[1] + dy, 2)));
+			var dir = (dx * (Math.sin(parent.r) * parent.h * parent.com[1] + dx) + dy * ( - Math.cos(parent.r) * parent.h * parent.com[1] + dy)) / (Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2)) * Math.sqrt(Math.pow(Math.sin(parent.r) * parent.h * parent.com[1] + dx, 2) + Math.pow( - Math.cos(parent.r) * parent.h * parent.com[1] + dy, 2)));
 		};
 
-		if (dir >= 0.8) {
-			parent.attack("slash");
-		} else if (dir <= - 0.8) {
-			parent.attack("stab");
-		} else {parent.attack(null)};
-
 		//update Positon and Rotation	
-		if (nr < - 0.5 * Math.PI || nr > 0.7 * Math.PI) {
+		if (dir <= - 0.8) {
+			//in case stab
+			parent.x += dir * Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2)) * (hx - parent.x) / Math.sqrt(Math.pow(hx - parent.x, 2) + Math.pow(hy - parent.y, 2));
+			parent.y += dir * Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2)) * (hy - parent.y) / Math.sqrt(Math.pow(hx - parent.x, 2) + Math.pow(hy - parent.y, 2));
+		} else if (nr < - 0.5 * Math.PI || nr > 0.7 * Math.PI) {
+			//in case max rotation
 			parent.x += dx;
 			parent.y += dy;
 		} else {
@@ -129,6 +132,9 @@ function sMove(parent) {
 			parent.y = ny;
 			parent.r = nr;
 		};
+
+		//check for attack
+		parent.attack(dir);
 	};
 };
 
