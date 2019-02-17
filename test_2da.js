@@ -116,8 +116,8 @@ function sMove(parent) {
 		nhy = hy + parent.v.y;
 
 		//Find new com Position in new x (nx) and new y (ny)
-		nx = nhx - (nhx - parent.x) * vectorLength(hx - parent.x, hy - parent.y)/ vectorLength(nhx - parent.x, nhy - parent.y);
-		ny = nhy - (nhy - parent.y) * vectorLength(hx - parent.x, hy - parent.y)/ vectorLength(nhx - parent.x, nhy - parent.y);
+		nx = nhx - (nhx - parent.x) * vectorLength(hx - parent.x, hy - parent.y) / vectorLength(nhx - parent.x, nhy - parent.y);
+		ny = nhy - (nhy - parent.y) * vectorLength(hx - parent.x, hy - parent.y) / vectorLength(nhx - parent.x, nhy - parent.y);
 		
 		//Find new angle in new r (nr)
 		if (nhx - nx <= 0) {
@@ -126,12 +126,10 @@ function sMove(parent) {
 			nr = - Math.acos((nhy - ny) / vectorLength(nhx - nx, nhy - ny));
 		};
 
-		//Check for attack
-		if ((parent.v.x != 0 || parent.v.y != 0) && mouse.button == 0) {	
-			// dir is cos of angle between mouse movement and Handle vector
-			dir = (parent.v.x * (hx - parent.x) + parent.v.y * (hy - parent.y))
-				/ (vectorLength(parent.v.x, parent.v.y) * vectorLength(hx - parent.x, hy - parent.y));
-		};
+		//Check for attack	
+		// dir is cos of angle between mouse movement and Handle vector
+		dir = (parent.v.x * (hx - parent.x) + parent.v.y * (hy - parent.y))
+			/ (vectorLength(parent.v.x, parent.v.y) * vectorLength(hx - parent.x, hy - parent.y));
 
 		//update Positon and Rotation	
 		if (dir <= - 0.85) {
