@@ -92,18 +92,18 @@ function sMove(parent) {
 
 	
 	//unitvector of mouse position change
-	dx = Math.abs(mouse.sx - mouse.fx) > 0 ? (mouse.sx - mouse.fx) / vectorLength(mouse.sx - mouse.fx, mouse.sy - mouse.fy) : 0;
-	dy = Math.abs(mouse.sy - mouse.fy) > 0 ? (mouse.sy - mouse.fy) / vectorLength(mouse.sx - mouse.fx, mouse.sy - mouse.fy) : 0;
+	dx = checkDevisionByZero(mouse.sx - mouse.fx, vectorLength(mouse.sx - mouse.fx, mouse.sy - mouse.fy));
+	dy = checkDevisionByZero(mouse.sy - mouse.fy, vectorLength(mouse.sx - mouse.fx, mouse.sy - mouse.fy));
 
 	//acceleration (a); time until max velocity is reached (t)
 	t = 0.4;
 	a = parent.v.max / (myGameArea.fps * t);
 
 	//change velocity vector
-	if (mouse.button == 0) {
-		parent.v.x += Math.abs(mouse.sx - mouse.fx) == 0 && vectorLength(parent.v.x, parent.v.y) > 0 ? - parent.v.x / vectorLength(parent.v.x, parent.v.y) * a : dx * a;
-		parent.v.y += Math.abs(mouse.sy - mouse.fy) == 0 && vectorLength(parent.v.x, parent.v.y) > 0 ? - parent.v.y / vectorLength(parent.v.x, parent.v.y) * a : dy * a;
-	};
+	parent.v.x = mouse.button == 0 && Math.abs(dx) > 0 ? parent.v.x + dx * a :
+		roundToZero(parent.v.x ,checkDevisionByZero(- parent.v.x * a, vectorLength(parent.v.x, parent.v.y), - parent.v.x));
+	parent.v.y = mouse.button == 0 && Math.abs(dy) > 0 ? parent.v.y + dy * a :
+		roundToZero(parent.v.y ,checkDevisionByZero(- parent.v.y * a, vectorLength(parent.v.x, parent.v.y), - parent.v.y));
 
 	//check max velocity
 	if (vectorLength(parent.v.x, parent.v.y) > parent.v.max) {
@@ -172,9 +172,17 @@ function myClear(ev) {
 	mouse.button = null;
 };
 
-//Useful functions
+//Utility functions
 function vectorLength (x, y) {
 	return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
-}
+};
 
+function checkDevisionByZero (dividend, divisor, ifZero) {
+	ifZero = ifZero || 0;
+	return quotient = Math.abs(divisor) > 0 ? dividend / divisor : ifZero;
+};
+
+function roundToZero (value, change) {
+	return difference = Math.abs(change) > Math.abs(value) ? 0 : value + change; 
+};
 
