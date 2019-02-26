@@ -52,7 +52,7 @@ function sword(x, y, w, h, com_y) {
 	this.v = {
 		x: 0,
 		y: 0,
-		max: 40	
+		max: 30	
 	};
 
 	// com = Center of mass
@@ -90,70 +90,66 @@ function sword(x, y, w, h, com_y) {
 //Sword Move 
 function sMove(parent) {
 
-	if (mouse.button == 0 && (mouse.sx != mouse.fx || mouse.sy != mouse.fy)) {
-		// unitvector of mouse position change
-		dx = (mouse.sx - mouse.fx) / Math.sqrt(Math.pow(mouse.sx - mouse.fx, 2) + Math.pow(mouse.sy - mouse.fy, 2));
-		dy = (mouse.sy - mouse.fy) / Math.sqrt(Math.pow(mouse.sx - mouse.fx, 2) + Math.pow(mouse.sy - mouse.fy, 2));
+	
+	//unitvector of mouse position change
+	dx = Math.abs(mouse.sx - mouse.fx) > 0 ? (mouse.sx - mouse.fx) / vectorLength(mouse.sx - mouse.fx, mouse.sy - mouse.fy) : 0;
+	dy = Math.abs(mouse.sy - mouse.fy) > 0 ? (mouse.sy - mouse.fy) / vectorLength(mouse.sx - mouse.fx, mouse.sy - mouse.fy) : 0;
 
-		//acceleration (a); time until max velocity is reached (t)
-		t = 0.6;
-		a = parent.v.max / (myGameArea.fps * t);
+	//acceleration (a); time until max velocity is reached (t)
+	t = 0.4;
+	a = parent.v.max / (myGameArea.fps * t);
 
-		//change velocity vector
-		parent.v.x += dx * a;
-		parent.v.y += dy * a;
-		
-		//check max velocity
-		if (vectorLength(parent.v.x, parent.v.y) > parent.v.max) {
-			parent.v.x *= parent.v.max / vectorLength(parent.v.x, parent.v.y);
-			parent.v.y *= parent.v.max / vectorLength(parent.v.x, parent.v.y);
-		};
-
-	 	// hx, hy Handle Position; nhx, nhy new Handle position
-		hx = Math.sin(parent.r) * parent.h * parent.com[1] + parent.x;
-		hy = - Math.cos(parent.r) * parent.h * parent.com[1] + parent.y;
-		nhx = hx + parent.v.x;
-		nhy = hy + parent.v.y;
-
-		//Find new com Position in new x (nx) and new y (ny)
-		nx = nhx - (nhx - parent.x) * vectorLength(hx - parent.x, hy - parent.y) / vectorLength(nhx - parent.x, nhy - parent.y);
-		ny = nhy - (nhy - parent.y) * vectorLength(hx - parent.x, hy - parent.y) / vectorLength(nhx - parent.x, nhy - parent.y);
-		
-		//Find new angle in new r (nr)
-		if (nhx - nx <= 0) {
-			nr = Math.acos((nhy - ny) / vectorLength(nhx - nx, nhy - ny)); 
-		} else {
-			nr = - Math.acos((nhy - ny) / vectorLength(nhx - nx, nhy - ny));
-		};
-
-		//Check for attack	
-		// dir is cos of angle between mouse movement and Handle vector
-		dir = (parent.v.x * (hx - parent.x) + parent.v.y * (hy - parent.y))
-			/ (vectorLength(parent.v.x, parent.v.y) * vectorLength(hx - parent.x, hy - parent.y));
-
-		//update Positon and Rotation	
-		if (dir <= - 0.85) {
-			//in case stab
-			parent.x += dir * vectorLength(parent.v.x, parent.v.y) * (hx - parent.x) / vectorLength(hx - parent.x, hy - parent.y);
-			parent.y += dir * vectorLength(parent.v.x, parent.v.y) * (hy - parent.y) / vectorLength(hx - parent.x, hy - parent.y);
-		} else if (nr < - 0.5 * Math.PI || nr > 0.7 * Math.PI) {
-			//in case max rotation
-			parent.x += parent.v.x * 0.8;
-			parent.y += parent.v.y * 0.8;
-		} else {
-			parent.x = nx;
-			parent.y = ny;
-			parent.r = nr;
-		};
-
-		//check for attack
-		parent.attack(dir);
-
-	} else  if (mouse.sx != mouse.fx || mouse.sy != mouse.fy){
-		
-		parent.v.x = 0;
-		parent.v.y = 0;
+	//change velocity vector
+	if (mouse.button == 0) {
+		parent.v.x += Math.abs(mouse.sx - mouse.fx) == 0 && vectorLength(parent.v.x, parent.v.y) > 0 ? - parent.v.x / vectorLength(parent.v.x, parent.v.y) * a : dx * a;
+		parent.v.y += Math.abs(mouse.sy - mouse.fy) == 0 && vectorLength(parent.v.x, parent.v.y) > 0 ? - parent.v.y / vectorLength(parent.v.x, parent.v.y) * a : dy * a;
 	};
+
+	//check max velocity
+	if (vectorLength(parent.v.x, parent.v.y) > parent.v.max) {
+		parent.v.x *= parent.v.max / vectorLength(parent.v.x, parent.v.y);
+		parent.v.y *= parent.v.max / vectorLength(parent.v.x, parent.v.y);
+	};
+
+ 	// hx, hy Handle Position; nhx, nhy new Handle position
+	hx = Math.sin(parent.r) * parent.h * parent.com[1] + parent.x;
+	hy = - Math.cos(parent.r) * parent.h * parent.com[1] + parent.y;
+	nhx = hx + parent.v.x;
+	nhy = hy + parent.v.y;
+
+	//Find new com Position in new x (nx) and new y (ny)
+	nx = nhx - (nhx - parent.x) * vectorLength(hx - parent.x, hy - parent.y) / vectorLength(nhx - parent.x, nhy - parent.y);
+	ny = nhy - (nhy - parent.y) * vectorLength(hx - parent.x, hy - parent.y) / vectorLength(nhx - parent.x, nhy - parent.y);
+	
+	//Find new angle in new r (nr)
+	if (nhx - nx <= 0) {
+		nr = Math.acos((nhy - ny) / vectorLength(nhx - nx, nhy - ny)); 
+	} else {
+		nr = - Math.acos((nhy - ny) / vectorLength(nhx - nx, nhy - ny));
+	};
+
+	//Check for attack	
+	// dir is cos of angle between mouse movement and Handle vector
+	dir = (parent.v.x * (hx - parent.x) + parent.v.y * (hy - parent.y))
+		/ (vectorLength(parent.v.x, parent.v.y) * vectorLength(hx - parent.x, hy - parent.y));
+
+	//update Positon and Rotation	
+	if (dir <= - 0.85) {
+		//in case stab
+		parent.x += dir * vectorLength(parent.v.x, parent.v.y) * (hx - parent.x) / vectorLength(hx - parent.x, hy - parent.y);
+		parent.y += dir * vectorLength(parent.v.x, parent.v.y) * (hy - parent.y) / vectorLength(hx - parent.x, hy - parent.y);
+	} else if (nr < - 0.5 * Math.PI || nr > 0.7 * Math.PI) {
+		//in case max rotation
+		parent.x += parent.v.x * 0.8;
+		parent.y += parent.v.y * 0.8;
+	} else {
+		parent.x = nx;
+		parent.y = ny;
+		parent.r = nr;
+	};
+
+	//check for attack
+	parent.attack(dir);
 };
 
 
